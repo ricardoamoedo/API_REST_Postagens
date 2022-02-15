@@ -52,7 +52,7 @@ def find_index_post(id):
 
 # rota raiz
 @app.get("/")
-async def root():
+def root():
     return {"status": 200, "Message": "ok"}
 
 @app.get("/posts")
@@ -89,3 +89,19 @@ def delete_post(id:int):
     my_posts.pop(index)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+
+@app.put("/posts/{id}")
+def update_post(id:int, post: Post):
+    
+    index = find_index_post(id)
+
+    if index == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id: {id} not found")
+
+    post_dic = post.dict()
+    post_dic['id'] = id
+    my_posts[index] = post_dic
+
+    return {"data": post_dic}
