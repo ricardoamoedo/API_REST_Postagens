@@ -6,16 +6,24 @@ from email import contentmanager, message
 from turtle import title
 from typing import Optional
 from urllib import response
-from fastapi import Body, FastAPI, Response, status, HTTPException
+from fastapi import Body, FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
 from pydantic import BaseModel
 from random import randrange
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
+from sqlalchemy.orm import Session
+from . import models
+from .database import engine, get_db
+
+# documentação do sqlalchemy
+models.Base.metadata.create_all(bind=engine)
 
 # instanciando o fastapi
 app = FastAPI()
+
+
 
 class Post(BaseModel):
     title: str
