@@ -2,10 +2,10 @@
 # version: 1.0
 
 # bibliotecas
-from email import contentmanager, message
+#from email import contentmanager, message
 from turtle import title
 from typing import Optional
-from urllib import response
+#from urllib import response
 from fastapi import Body, FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
 from pydantic import BaseModel
@@ -28,8 +28,10 @@ app = FastAPI()
 class Post(BaseModel):
     title: str
     content: str
-    publish: bool = True
-    rating: Optional[int] = None
+    published: bool = True
+
+
+
 
 while True:
     try:
@@ -44,7 +46,7 @@ while True:
         print("Error", error)
         time.sleep(2)
 
-
+'''
 my_posts = [
     {
         "title": "title os post 1", 
@@ -72,34 +74,46 @@ def find_index_post(id):
         if p['id'] == id:
             return i
 
-
+'''
 
 # rota raiz
 @app.get("/")
 def root():
     return {"status": 200, "Message": "ok"}
 
+
+
 @app.get("/posts")
-def get_posts():
-    cursor.execute("""SELECT * FROM posts""")
-    posts = cursor.fetchall()
+def get_posts(db: Session = Depends(get_db)):
+    #cursor.execute("""SELECT * FROM posts""")
+    #posts = cursor.fetchall()
+    posts = db.query(models.Post).all()
     return {"data": posts}
 
-@app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_posts(post: Post):
-    cursor.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING 
-    * """, (post.title, post.content, post.publish))
-    new_post = cursor.fetchone()
 
-    conn.commit()
+
+@app.post("/posts", status_code=status.HTTP_201_CREATED)
+def create_posts(post: Post, db: Session = Depends(get_db)):
+    #cursor.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING 
+    #* """, (post.title, post.content, post.publish))
+    #new_post = cursor.fetchone()
+
+    #conn.commit()
+
+    #new_post = models.Post(title=post.title, content=post.content, published=post.published)
+    new_post = models.Post(**post.dict())
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
     
     return {"data":new_post}
 
 
 @app.get("/posts/{id}")
-def get_post(id: int):
-    cursor.execute("""SELECT * FROM posts WHERE id = %s """, (str(id),))
-    post = cursor.fetchone()
+def get_post(id: int,  db: Session = Depends(get_db)):
+    #cursor.execute("""SELECT * FROM posts WHERE id = %s """, (str(id),))
+    #post = cursor.fetchone()
+    post = db.query(models.Post).filter(models.Post.id == id).first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
                             detail=f"Post com id {id} não encontrado")
