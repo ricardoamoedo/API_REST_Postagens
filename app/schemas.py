@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 # schema model
 class PostBase(BaseModel):
@@ -7,5 +8,14 @@ class PostBase(BaseModel):
     published: bool = True
 
 
+
 class PostCreate(PostBase):
     pass
+
+
+class Post(PostBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
