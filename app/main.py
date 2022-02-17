@@ -2,11 +2,10 @@
 # version: 1.0
 
 # bibliotecas
-#from email import contentmanager, message
+from email import contentmanager, message
 from turtle import title
 from typing import Optional, List
 from urllib import response
-#from urllib import response
 from fastapi import Body, FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
 from pydantic import BaseModel
@@ -26,7 +25,7 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 
-'''
+
 while True:
     try:
         conn = psycopg2.connect(host='localhost', database='postgres', 
@@ -40,7 +39,7 @@ while True:
         print("Error", error)
         time.sleep(2)
 
-'''
+
 '''
 my_posts = [
     {
@@ -159,3 +158,27 @@ def update_post(id:int, updated_post: schemas.PostCreate, db: Session = Depends(
 
 
     return post_query.first()
+
+
+
+@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    
+    new_user = models.User(**user.dict())
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    return new_user
+
+
+
+@app.get("/users/{id}", response_model=schemas.UserOut)
+def get_post(id: int,  db: Session = Depends(get_db)):
+    #cursor.execute("""SELECT * FROM posts WHERE id = %s """, (str(id),))
+    #post = cursor.fetchone()
+    user = db.query(models.User).filter(models.User.id == id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                            detail=f"Usuário com id {id} não encontrado")
+    return user
