@@ -3,6 +3,8 @@ from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.expression import null
 from .database import Base
 
+
+# Tabela do banco de dados
 class Post(Base):
     __tablename__ = "posts"
 

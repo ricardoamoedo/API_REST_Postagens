@@ -14,7 +14,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
 from sqlalchemy.orm import Session
-from . import models
+from . import models, schemas
 from .database import engine, get_db
 
 
@@ -25,15 +25,7 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 
-
-class Post(BaseModel):
-    title: str
-    content: str
-    published: bool = True
-
-
-
-
+'''
 while True:
     try:
         conn = psycopg2.connect(host='localhost', database='postgres', 
@@ -47,6 +39,7 @@ while True:
         print("Error", error)
         time.sleep(2)
 
+'''
 '''
 my_posts = [
     {
@@ -94,7 +87,7 @@ def get_posts(db: Session = Depends(get_db)):
 
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_posts(post: Post, db: Session = Depends(get_db)):
+def create_posts(post: schemas.PostCreate, db: Session = Depends(get_db)):
     #cursor.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s) RETURNING 
     #* """, (post.title, post.content, post.publish))
     #new_post = cursor.fetchone()
@@ -142,7 +135,7 @@ def delete_post(id:int, db: Session = Depends(get_db)):
 
 
 @app.put("/posts/{id}")
-def update_post(id:int, updated_post: Post, db: Session = Depends(get_db)):
+def update_post(id:int, updated_post: schemas.PostCreate, db: Session = Depends(get_db)):
 
     # cursor.execute("""UPDATE posts SET title = %s,
     #                 content = %s, published = %s WHERE id = %s
