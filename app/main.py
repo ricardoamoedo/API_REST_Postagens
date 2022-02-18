@@ -14,7 +14,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
 from sqlalchemy.orm import Session
-from . import models, schemas
+from . import models, schemas, utils
 from .database import engine, get_db
 
 
@@ -171,6 +171,10 @@ def get_users(db: Session = Depends(get_db)):
 @app.post("/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     
+    # hash the password - user.password
+    hashed_password = utils.hash(user.password)
+    user.password = hashed_password
+
     new_user = models.User(**user.dict())
     db.add(new_user)
     db.commit()
@@ -181,7 +185,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 
 @app.get("/users/{id}", response_model=schemas.UserOut)
-def get_post(id: int,  db: Session = Depends(get_db)):
+def get_users(id: int,  db: Session = Depends(get_db)):
     #cursor.execute("""SELECT * FROM posts WHERE id = %s """, (str(id),))
     #post = cursor.fetchone()
     user = db.query(models.User).filter(models.User.id == id).first()
