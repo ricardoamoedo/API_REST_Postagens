@@ -1,5 +1,9 @@
+from os import access
+from typing import Optional
+import typing
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
+from typing import Optional
 
 # schema model
 class PostBase(BaseModel):
@@ -40,3 +44,10 @@ class UserOut(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    id: Optional[str] = None
